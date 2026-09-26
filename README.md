@@ -28,7 +28,7 @@ clean = hunt(my_fetcher, ["https://shop-a", "https://shop-b"])
 records. It needs no extra packages, only your gateway key in the environment:
 
 ```bash
-export AI_GATEWAY_API_KEY=your_key   # or put it in .env (git-ignored)
+cp .env.example .env   # then fill in AI_GATEWAY_API_KEY=your_key (git-ignored)
 ```
 
 ```python

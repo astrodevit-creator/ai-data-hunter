@@ -28,6 +28,20 @@ class JevError(RuntimeError):
     pass
 
 
+def _load_dotenv(path: str = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")) -> None:
+    """Load KEY=VALUE lines from the repo's .env without overriding real env vars."""
+    try:
+        with open(path) as f:
+            for line in f:
+                line = line.strip()
+                if not line or line.startswith("#") or "=" not in line:
+                    continue
+                k, v = line.split("=", 1)
+                os.environ.setdefault(k.strip(), v.strip().strip("'\""))
+    except FileNotFoundError:
+        pass
+
+
 def _http_post(url: str, headers: Dict, payload: Dict) -> Dict:
     req = urllib.request.Request(
         url, data=json.dumps(payload).encode(), headers=headers, method="POST"
@@ -47,6 +61,8 @@ def evaluate(state: str, questions: Dict[str, Dict], *,
     ``questions`` maps a name to a spec, e.g.
     ``{"isProduct": {"type": "boolean", "instructions": "Is this a product?"}}``.
     """
+    if not api_key:
+        _load_dotenv()
     key = api_key or os.environ.get("AI_GATEWAY_API_KEY")
     if not key:
         raise JevError("AI_GATEWAY_API_KEY is not set")
