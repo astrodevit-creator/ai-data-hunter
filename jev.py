@@ -72,21 +72,16 @@ def evaluate(state: str, questions: Dict[str, Dict], *,
 
 
 def boolean_probability(response: Dict, name: str) -> Optional[float]:
-    """Pull the probability for boolean question ``name`` out of a response.
+    """Probability for boolean question ``name``.
 
-    Tolerates a few plausible shapes (``answers``/``results``/top-level, value
-    as a number or an object with ``probability``) since the output format
-    should be confirmed against a real response.
+    Gateway response shape (confirmed against a live call)::
+
+        {"answers": {"<name>": {"type": "boolean", "probability": 0.68}}, ...}
     """
-    for container in (response.get("answers"), response.get("results"), response):
-        if isinstance(container, dict) and name in container:
-            v = container[name]
-            if isinstance(v, (int, float)) and not isinstance(v, bool):
-                return float(v)
-            if isinstance(v, dict):
-                for k in ("probability", "p", "value", "score"):
-                    if isinstance(v.get(k), (int, float)) and not isinstance(v.get(k), bool):
-                        return float(v[k])
+    answer = (response.get("answers") or {}).get(name) or {}
+    p = answer.get("probability")
+    if isinstance(p, (int, float)) and not isinstance(p, bool):
+        return float(p)
     return None
 
 
